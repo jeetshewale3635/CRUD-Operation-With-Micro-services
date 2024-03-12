@@ -13,9 +13,14 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(value = NoSuchDepartmentExists.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST) public @ResponseBody ErrorResponse
-	 handleException(NoSuchDepartmentExists ex) {
-	 System.out.println("Global exception"); return new
-	 ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()); }
-	 
+	 		handleException(NoSuchDepartmentExists ex) {
+		return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()); 
+	 }
+	
+	@ExceptionHandler(value = UsernameNotFoundException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST) public @ResponseBody ErrorResponse
+		handleException(UsernameNotFoundException ex) {
+		return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()); 
+}	 
 
 }
