@@ -1,9 +1,12 @@
 package com.ajit.crud.config;
 
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import org.springframework.beans.factory.annotation.Autowired; 
 import org.springframework.context.annotation.Bean; 
-import org.springframework.context.annotation.Configuration; 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager; 
 import org.springframework.security.authentication.AuthenticationProvider; 
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider; 
@@ -11,13 +14,13 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity; 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity; 
-import org.springframework.security.config.http.SessionCreationPolicy; 
 import org.springframework.security.core.userdetails.UserDetailsService; 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; 
 import org.springframework.security.crypto.password.PasswordEncoder; 
 import org.springframework.security.web.SecurityFilterChain; 
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; 
-  
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import com.ajit.crud.filter.JwtAuthFilter;
 import com.ajit.crud.service.UserInfoService;
@@ -38,19 +41,18 @@ public class SecurityConfig {
   
     // Configuring HttpSecurity 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception { 
-        return http.csrf().disable() 
-                .authorizeHttpRequests() 
-                //.requestMatchers("/auth/welcome", "/auth/addNewUser", "/auth/generateToken").permitAll()
-                .requestMatchers("/auth/generateToken").permitAll()
-                .and() 
-                .authorizeHttpRequests().requestMatchers("/auth/user/**").authenticated() 
-                .and() 
-                .authorizeHttpRequests().requestMatchers("/auth/admin/**").authenticated() 
-                .and() 
-                .sessionManagement() 
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
-                .and() 
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception { 
+        return http
+                .cors(withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authz ->
+                    authz
+                        .requestMatchers(mvc.pattern("/auth/welcome")).permitAll()
+                        .requestMatchers(mvc.pattern("/auth/addNewUser")).permitAll()
+                        .requestMatchers(mvc.pattern(HttpMethod.POST,"/auth/generateToken")).permitAll()
+                        .requestMatchers(mvc.pattern("/auth/user/**")).authenticated()
+                        .requestMatchers(mvc.pattern("/auth/admin/**")).authenticated()
+                )
                 .authenticationProvider(authenticationProvider()) 
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class) 
                 .build(); 
@@ -74,6 +76,11 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception { 
         return config.getAuthenticationManager(); 
     } 
+    
+    @Bean
+    MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
+        return new MvcRequestMatcher.Builder(introspector);
+    }
   
   
 } 
