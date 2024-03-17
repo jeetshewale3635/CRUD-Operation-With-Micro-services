@@ -24,16 +24,4 @@ public class AuthRequest {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public AuthRequest(String username, String password) {
-		super();
-		this.username = username;
-		this.password = password;
-	}
-	public AuthRequest() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-	
-	
-	
 }

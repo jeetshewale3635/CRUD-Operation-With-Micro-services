@@ -1,17 +1,21 @@
 package com.ajit.crud.service;
 
 
-import org.springframework.beans.factory.annotation.Autowired; 
-import org.springframework.security.core.userdetails.UserDetails; 
-import org.springframework.security.core.userdetails.UserDetailsService; 
-import org.springframework.security.core.userdetails.UsernameNotFoundException; 
-import org.springframework.security.crypto.password.PasswordEncoder; 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ajit.crud.entity.UserInfo;
-import com.ajit.crud.repository.UserInfoRepository;
-
-import java.util.Optional; 
+import com.ajit.crud.repository.UserInfoRepository; 
 
 @Service
 public class UserInfoService implements UserDetailsService {
@@ -30,9 +34,14 @@ public class UserInfoService implements UserDetailsService {
 	  
 	        System.out.println(" Username = "+userDetail.get().getName());
 	        // Converting userDetail to UserDetails 
-	        return userDetail.map(UserInfoDetails::new) 
+	        return userDetail.map(this::createSpringSecurityUser) 
 	                .orElseThrow(() -> new UsernameNotFoundException("User not found " + username)); 
 	    } 
+	  
+	  private User createSpringSecurityUser(UserInfo user) {
+	        List<SimpleGrantedAuthority> grantedAuthorities = Arrays.asList(new SimpleGrantedAuthority(user.getRoles()));
+	        return new User(user.getName(), user.getPassword(), grantedAuthorities);
+	    }
 	 
 
 	public String addUser(UserInfo userInfo) {

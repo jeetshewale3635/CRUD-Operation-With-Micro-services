@@ -11,13 +11,6 @@ public class ErrorResponse {
 
 	private int statusCode;
 	private String message;
-	
-	public ErrorResponse(int id, String msg) {
-		super();
-		this.message = msg;
-		this.statusCode = id;
-		
-	}
 
 	public int getStatusCode() {
 		return statusCode;
